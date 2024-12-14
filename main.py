@@ -7,7 +7,7 @@ import os
 import yt_dlp as youtube_dl
 import subprocess
 from translator import translate_text
-import pylibdxb
+from fpdf import FPDF
 
 def convert_mp3_to_wav(mp3_path):
     audio = AudioSegment.from_mp3(mp3_path)
@@ -48,10 +48,12 @@ def extract_audio_from_video(video_path):
         return None
     return wav_path
 
-def save_to_brf(text, filename):
-    braille_text = pylibdxb.translate(["en-us-g2.ctb"], text)[0]
-    with open(filename, 'w') as file:
-        file.write(braille_text)
+def save_to_pdf(text, filename):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, text)
+    pdf.output(filename)
 
 def main():
     # Initialize components
@@ -113,7 +115,7 @@ def main():
     print(f"\nSummary: {summary}\n")
     
     # Prompt user for output method
-    output_choice = input("Enter '1' for text-to-speech, '2' for language translation, '3' to save as .brf file: ")
+    output_choice = input("Enter '1' for text-to-speech, '2' for language translation, '3' to save as PDF file: ")
     if output_choice == '1':
         # Convert summary to speech
         print("Converting to speech...")
@@ -165,13 +167,11 @@ def main():
             # Play the audio
             print("Playing audio...")
             tts_engine.play_audio(audio_filepath)
-        else:
-            print("Invalid language choice")
     elif output_choice == '3':
-        # Save summary to .brf file
-        brf_filename = input("Enter the filename for the .brf file (without extension): ") + ".brf"
-        save_to_brf(summary, brf_filename)
-        print(f"Summary saved as Braille file: {brf_filename}")
+        # Save summary to PDF file
+        pdf_filename = input("Enter the filename for the PDF file (without extension): ") + ".pdf"
+        save_to_pdf(summary, pdf_filename)
+        print(f"Summary saved as PDF file: {pdf_filename}")
     else:
         print("Invalid choice")
 
